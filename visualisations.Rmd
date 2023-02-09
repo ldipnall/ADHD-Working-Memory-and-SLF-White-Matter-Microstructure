@@ -1,0 +1,556 @@
+---
+title: "Plotting"
+author: "Lilly Dipnall"
+date: "06/02/2023"
+output:
+  word_document: default
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+require("knitr")
+opts_knit$set(root.dir = "/Users/cogld/Documents/adhd_workmem/")
+```
+
+#Set Working Directory
+```{r,echo=FALSE, warning=FALSE, message=FALSE}
+setwd("/Users/cogld/Documents/adhd_workmem/")
+```
+
+#Library
+```{r}
+suppressPackageStartupMessages({
+  library("dplyr")
+  library("tidyverse")
+  library("expss")
+  library("gplots")
+  library("beeswarm")
+  library("RColorBrewer")
+  library("ggplot2")
+  library("ggpubr")
+  library("patchwork")
+  library("table1")
+  library("ggbeeswarm")
+})
+```
+#Import Data
+```{r,echo=FALSE, warning=FALSE, message=FALSE}
+data <- read.csv("/Users/cogld/Documents/adhd_workmem/data.csv")
+dim(data)
+head(data)
+
+fwd <- read.csv("/Users/cogld/Documents/adhd_workmem/nicap_w1_b2800_fwd.csv")
+dim(fwd)
+head(fwd)
+
+data %>% full_join(fwd, by = c("id"="id"))
+```
+#Labelling Variables
+```{r,echo=FALSE, warning=FALSE, message=FALSE}
+data$group_dich <- as.factor(data$group_dich)
+data$sex <- as.factor(data$sex)
+data$c3_childage2 <- as.numeric(data$c3_childage2)
+data$p3medcur <- as.factor(data$p3medcur)
+data$handed <- as.factor(data$handed)
+data$L_SLF2_tbv <- as.numeric(data$L_SLF2_tbv)
+data$L_SLF2_AFD_m <- as.numeric(data$L_SLF2_AFD_m)
+data$rt2_log <- as.numeric(data$rt2_log)
+data$rtv2_log <- as.numeric(data$rtv2_log)
+```
+
+```{r,echo=FALSE, warning=FALSE, message=FALSE}
+data = apply_labels(data,
+                    c3_childage2 = "Age",
+                    group_dich = "Group",
+                    #group_dich = c("ADHD" = 1,
+                                   #"Control" = 0),
+                    sex = "Sex",
+                    #sex = c("Female" = 1,
+                            #"Male" = 0),
+                    p3medcur = "Medication Status",
+                    handed = "Handedness",
+                    c1_iq_sts = "FSIQ",
+                    IRSADScore = "SES",
+                    L_SLF2_tbv = "Left SLF2 Volume",
+                    L_SLF2_AFD_m = "Left SLF2 AFD",
+                    rt2_log = "N-Back Reaction Time (RT)",
+                    rtv2_log = "N-Back RT Variability",
+                    c3_nback_b_total_misses_2 = "Misses",
+                    c3_nback_b_d_2 = "d-prime (d')",
+                    c3_nback_b_c_2 = "c",
+                    c3_nback_b_total_fa_2 = "False Alarms",
+                    c3_nback_b_bl1_hit_rt_2 = "Reaction Time",
+                    c3_nback_b_bl1_hit_rtvar_2 = "Reaction Time Variability")
+data$c3_nback_b_total_fa_2
+```
+#Working Memory Distributions
+#Misses
+```{r}
+vp_tm <- ggplot(data, aes(x=group_dich, y=c3_nback_b_total_misses_2, colour=group_dich)) + 
+  geom_violin(alpha = 0.5) +
+  geom_quasirandom() + 
+  theme(legend.position = "none") +
+  scale_y_continuous(name = "Misses") + 
+  scale_x_discrete(name = "")
+vp_tm <- vp_tm + geom_boxplot(width=0.06) + 
+  stat_summary(fun.y=mean, geom="point", shape=2, size=2, colour="blue") +
+  stat_summary(fun.y=median, geom="point", size=2, color="purple") + 
+  scale_color_brewer(palette="Dark2") +
+  labs(title= "Total Misses")
+
+legend_title <- "Group"
+vp_tm <- vp_tm + theme(legend.position = "none")
+vp_tm
+ggsave("vp_tm.png")
+```
+
+#d-Prime
+```{r}
+vp_dp <- ggplot(data, aes(x=group_dich, y=c3_nback_b_d_2, colour=group_dich)) + 
+  geom_violin(alpha = 0.5) +
+  geom_quasirandom() + 
+  theme(legend.position = "none") +
+  scale_y_continuous(name = "d-Prime") + 
+  scale_x_discrete(name = "")
+vp_dp <- vp_dp + geom_boxplot(width=0.06) + 
+  stat_summary(fun.y=mean, geom="point", shape=2, size=2, colour="blue") +
+  stat_summary(fun.y=median, geom="point", size=2, color="purple") + 
+  scale_color_brewer(palette="Dark2") +
+  labs(title= "d-Prime")
+legend_title <- "Group"
+vp_dp <- vp_dp + theme(legend.position = "none")
+vp_dp
+ggsave("vp_dp.png")
+```
+#c
+```{r}
+vp_c <- ggplot(data, aes(x=group_dich, y=c3_nback_b_c_2, colour=group_dich)) + 
+  geom_violin(alpha = 0.5) +
+  geom_quasirandom() + 
+  theme(legend.position = "none") +
+  scale_y_continuous(name = "c") + 
+  scale_x_discrete(name = "")
+vp_c <- vp_c + geom_boxplot(width=0.06) + 
+  stat_summary(fun.y=mean, geom="point", shape=2, size=2, colour="blue") +
+  stat_summary(fun.y=median, geom="point", size=2, color="purple") + 
+  scale_color_brewer(palette="Dark2") +
+  labs(title= "c")
+legend_title <- "Group"
+vp_c <- vp_c + theme(legend.position = "none")
+vp_c
+ggsave("vp_c.png")
+```
+#total fa
+```{r}
+vp_tfa <- ggplot(data, aes(x=group_dich, y=c3_nback_b_total_fa_2, colour=group_dich)) + 
+  geom_violin(alpha = 0.5) +
+  geom_quasirandom() + 
+  theme(legend.position = "none") +
+  scale_y_continuous(name = "Total False Alarms") + 
+  scale_x_discrete(name = "")
+vp_tfa <- vp_tfa + geom_boxplot(width=0.06) + 
+  stat_summary(fun.y=mean, geom="point", shape=2, size=2, colour="blue") +
+  stat_summary(fun.y=median, geom="point", size=2, color="purple") + 
+  scale_color_brewer(palette="Dark2") +
+  labs(title= "Total False Alarms")
+legend_title <- "Group"
+vp_tfa <- vp_tfa + theme(legend.position = "none")
+vp_tfa
+ggsave("vp_tfa.png")
+```
+#Reaction Time
+```{r}
+vp_rt <- ggplot(data, aes(x=group_dich, y=c3_nback_b_bl1_hit_rt_2, colour=group_dich)) + 
+  geom_violin(alpha = 0.5) +
+  geom_quasirandom() + 
+  theme(legend.position = "none") +
+  scale_y_continuous(name = "Reaction Time") + 
+  scale_x_discrete(name = "")
+vp_rt <- vp_rt + geom_boxplot(width=0.06) + 
+  stat_summary(fun.y=mean, geom="point", shape=2, size=2, colour="blue") +
+  stat_summary(fun.y=median, geom="point", size=2, color="purple") + 
+  scale_color_brewer(palette="Dark2") +
+  labs(title= "Reaction Time")
+legend_title <- "Group"
+vp_rt <- vp_rt + theme(legend.position = "none")
+vp_rt
+ggsave("vp_rt.png")
+```
+#Reaction Time
+```{r}
+vp_rtv <- ggplot(data, aes(x=group_dich, y=c3_nback_b_bl1_hit_rtvar_2, colour=group_dich)) + 
+  geom_violin(alpha = 0.5) +
+  geom_quasirandom() + 
+  theme(legend.position = "none") +
+  scale_y_continuous(name = "Reaction Time Variability") + 
+  scale_x_discrete(name = "")
+vp_rtv <- vp_rtv + geom_boxplot(width=0.06) + 
+  stat_summary(fun.y=mean, geom="point", shape=2, size=2, colour="blue") +
+  stat_summary(fun.y=median, geom="point", size=2, color="purple") + 
+  scale_color_brewer(palette="Dark2") +
+  labs(title= "Reaction Time Variability")
+legend_title <- "Group"
+vp_rtv <- vp_rtv + theme(legend.position = "none")
+vp_rtv
+ggsave("vp_rtv.png")
+```
+#SLF Distributions
+#L_SLF1_AFD_m
+```{r}
+vp_lslf1_afd <- ggplot(data, aes(x=group_dich, y=L_SLF1_AFD_m, colour=group_dich)) + 
+  geom_violin(alpha = 0.5) +
+  geom_quasirandom() + 
+  theme(legend.position = "none") +
+  scale_y_continuous(name = "Left SLFI AFD") + 
+  scale_x_discrete(name = "")
+vp_lslf1_afd <- vp_lslf1_afd + geom_boxplot(width=0.06) + 
+  stat_summary(fun.y=mean, geom="point", shape=2, size=2, colour="blue") +
+  stat_summary(fun.y=median, geom="point", size=2, color="purple") + 
+  scale_color_brewer(palette="Dark2") +
+  labs(title= "Left SLFI AFD")
+legend_title <- "Group"
+vp_lslf1_afd <- vp_lslf1_afd + theme(legend.position = "none")
+vp_lslf1_afd
+ggsave("vp_lslf1_afd.png")
+```
+#L_SLF2_AFD_m
+```{r}
+vp_lslf2_afd <- ggplot(data, aes(x=group_dich, y=L_SLF2_AFD_m, colour=group_dich)) + 
+  geom_violin(alpha = 0.5) +
+  geom_quasirandom() + 
+  theme(legend.position = "none") +
+  scale_y_continuous(name = "Left SLFII AFD") + 
+  scale_x_discrete(name = "")
+vp_lslf2_afd <- vp_lslf2_afd + geom_boxplot(width=0.06) + 
+  stat_summary(fun.y=mean, geom="point", shape=2, size=2, colour="blue") +
+  stat_summary(fun.y=median, geom="point", size=2, color="purple") + 
+  scale_color_brewer(palette="Dark2") +
+  labs(title= "Left SLFII AFD")
+legend_title <- "Group"
+vp_lslf2_afd <- vp_lslf2_afd + theme(legend.position = "none")
+vp_lslf2_afd
+ggsave("vp_lslf2_afd.png")
+```
+#L_SLF3_AFD_m
+```{r}
+vp_lslf3_afd <- ggplot(data, aes(x=group_dich, y=L_SLF3_AFD_m, colour=group_dich)) + 
+  geom_violin(alpha = 0.5) +
+  geom_quasirandom() + 
+  theme(legend.position = "none") +
+  scale_y_continuous(name = "Left SLFIII AFD") + 
+  scale_x_discrete(name = "")
+vp_lslf3_afd <- vp_lslf3_afd + geom_boxplot(width=0.06) + 
+  stat_summary(fun.y=mean, geom="point", shape=2, size=2, colour="blue") +
+  stat_summary(fun.y=median, geom="point", size=2, color="purple") + 
+  scale_color_brewer(palette="Dark2") +
+  labs(title= "Left SLFIII AFD")
+legend_title <- "Group"
+vp_lslf3_afd <- vp_lslf3_afd + theme(legend.position = "none")
+vp_lslf3_afd
+ggsave("vp_lslf3_afd.png")
+```
+#R_SLF1_AFD_m
+```{r}
+vp_rslf1_afd <- ggplot(data, aes(x=group_dich, y=R_SLF1_AFD_m, colour=group_dich)) + 
+  geom_violin(alpha = 0.5) +
+  geom_quasirandom() + 
+  theme(legend.position = "none") +
+  scale_y_continuous(name = "Right SLFI AFD") + 
+  scale_x_discrete(name = "")
+vp_rslf1_afd <- vp_rslf1_afd + geom_boxplot(width=0.06) + 
+  stat_summary(fun.y=mean, geom="point", shape=2, size=2, colour="blue") +
+  stat_summary(fun.y=median, geom="point", size=2, color="purple") + 
+  scale_color_brewer(palette="Dark2") +
+  labs(title= "Right SLFI AFD")
+legend_title <- "Group"
+vp_rslf1_afd <- vp_rslf1_afd + theme(legend.position = "none")
+vp_rslf1_afd
+ggsave("vp_rslf1_afd.png")
+```
+
+#R_SLF2_AFD_m
+```{r}
+vp_rslf2_afd <- ggplot(data, aes(x=group_dich, y=R_SLF2_AFD_m, colour=group_dich)) + 
+  geom_violin(alpha = 0.5) +
+  geom_quasirandom() + 
+  theme(legend.position = "none") +
+  scale_y_continuous(name = "Right SLFII AFD") + 
+  scale_x_discrete(name = "")
+vp_rslf2_afd <- vp_rslf2_afd + geom_boxplot(width=0.06) + 
+  stat_summary(fun.y=mean, geom="point", shape=2, size=2, colour="blue") +
+  stat_summary(fun.y=median, geom="point", size=2, color="purple") + 
+  scale_color_brewer(palette="Dark2") +
+  labs(title= "Right SLFII AFD")
+legend_title <- "Group"
+vp_rslf2_afd <- vp_rslf2_afd + theme(legend.position = "none")
+vp_rslf2_afd
+ggsave("vp_rslf2_afd.png")
+```
+
+#R_SLF3_AFD_m
+```{r}
+vp_rslf3_afd <- ggplot(data, aes(x=group_dich, y=R_SLF3_AFD_m, colour=group_dich)) + 
+  geom_violin(alpha = 0.5) +
+  geom_quasirandom() + 
+  theme(legend.position = "none") +
+  scale_y_continuous(name = "Right SLFIII AFD") + 
+  scale_x_discrete(name = "")
+vp_rslf3_afd <- vp_rslf3_afd + geom_boxplot(width=0.06) + 
+  stat_summary(fun.y=mean, geom="point", shape=2, size=2, colour="blue") +
+  stat_summary(fun.y=median, geom="point", size=2, color="purple") + 
+  scale_color_brewer(palette="Dark2") +
+  labs(title= "Right SLFIII AFD")
+legend_title <- "Group"
+vp_rslf3_afd <- vp_rslf3_afd + theme(legend.position = "none")
+vp_rslf3_afd
+ggsave("vp_rslf3_afd.png")
+```
+
+
+
+#L_SLF1_FA_m
+```{r}
+vp_lslf1_FA <- ggplot(data, aes(x=group_dich, y=L_SLF1_bin_FA_m, colour=group_dich)) + 
+  geom_violin(alpha = 0.5) +
+  geom_quasirandom() + 
+  theme(legend.position = "none") +
+  scale_y_continuous(name = "Left SLFI FA") + 
+  scale_x_discrete(name = "")
+vp_lslf1_FA <- vp_lslf1_FA + geom_boxplot(width=0.06) + 
+  stat_summary(fun.y=mean, geom="point", shape=2, size=2, colour="blue") +
+  stat_summary(fun.y=median, geom="point", size=2, color="purple") + 
+  scale_color_brewer(palette="Dark2") +
+  labs(title= "Left SLFI FA")
+legend_title <- "Group"
+vp_lslf1_FA <- vp_lslf1_FA + theme(legend.position = "none")
+vp_lslf1_FA
+ggsave("vp_lslf1_FA.png")
+```
+#L_SLF2_FA_m
+```{r}
+vp_lslf2_FA <- ggplot(data, aes(x=group_dich, y=L_SLF2_bin_FA_m, colour=group_dich)) + 
+  geom_violin(alpha = 0.5) +
+  geom_quasirandom() + 
+  theme(legend.position = "none") +
+  scale_y_continuous(name = "Left SLFII FA") + 
+  scale_x_discrete(name = "")
+vp_lslf2_FA <- vp_lslf2_FA + geom_boxplot(width=0.06) + 
+  stat_summary(fun.y=mean, geom="point", shape=2, size=2, colour="blue") +
+  stat_summary(fun.y=median, geom="point", size=2, color="purple") + 
+  scale_color_brewer(palette="Dark2") +
+  labs(title= "Left SLFII FA")
+legend_title <- "Group"
+vp_lslf2_FA <- vp_lslf2_FA + theme(legend.position = "none")
+vp_lslf2_FA
+ggsave("vp_lslf2_FA.png")
+```
+#L_SLF3_FA_m
+```{r}
+vp_lslf3_FA <- ggplot(data, aes(x=group_dich, y=L_SLF3_bin_FA_m, colour=group_dich)) + 
+  geom_violin(alpha = 0.5) +
+  geom_quasirandom() + 
+  theme(legend.position = "none") +
+  scale_y_continuous(name = "Left SLFIII FA") + 
+  scale_x_discrete(name = "")
+vp_lslf3_FA <- vp_lslf3_FA + geom_boxplot(width=0.06) + 
+  stat_summary(fun.y=mean, geom="point", shape=2, size=2, colour="blue") +
+  stat_summary(fun.y=median, geom="point", size=2, color="purple") + 
+  scale_color_brewer(palette="Dark2") +
+  labs(title= "Left SLFIII FA")
+legend_title <- "Group"
+vp_lslf3_FA <- vp_lslf3_FA + theme(legend.position = "none")
+vp_lslf3_FA
+ggsave("vp_lslf3_FA.png")
+```
+#R_SLF1_FA_m
+```{r}
+vp_rslf1_FA <- ggplot(data, aes(x=group_dich, y=R_SLF1_bin_FA_m, colour=group_dich)) + 
+  geom_violin(alpha = 0.5) +
+  geom_quasirandom() + 
+  theme(legend.position = "none") +
+  scale_y_continuous(name = "Right SLFI FA") + 
+  scale_x_discrete(name = "")
+vp_rslf1_FA <- vp_rslf1_FA + geom_boxplot(width=0.06) + 
+  stat_summary(fun.y=mean, geom="point", shape=2, size=2, colour="blue") +
+  stat_summary(fun.y=median, geom="point", size=2, color="purple") + 
+  scale_color_brewer(palette="Dark2") +
+  labs(title= "Right SLFI FA")
+legend_title <- "Group"
+vp_rslf1_FA <- vp_rslf1_FA + theme(legend.position = "none")
+vp_rslf1_FA
+ggsave("vp_rslf1_FA.png")
+```
+
+#R_SLF2_FA_m
+```{r}
+vp_rslf2_FA <- ggplot(data, aes(x=group_dich, y=R_SLF2_bin_FA_m, colour=group_dich)) + 
+  geom_violin(alpha = 0.5) +
+  geom_quasirandom() + 
+  theme(legend.position = "none") +
+  scale_y_continuous(name = "Right SLFII FA") + 
+  scale_x_discrete(name = "")
+vp_rslf2_FA <- vp_rslf2_FA + geom_boxplot(width=0.06) + 
+  stat_summary(fun.y=mean, geom="point", shape=2, size=2, colour="blue") +
+  stat_summary(fun.y=median, geom="point", size=2, color="purple") + 
+  scale_color_brewer(palette="Dark2") +
+  labs(title= "Right SLFII FA")
+legend_title <- "Group"
+vp_rslf2_FA <- vp_rslf2_FA + theme(legend.position = "none")
+vp_rslf2_FA
+ggsave("vp_rslf2_FA.png")
+```
+
+#R_SLF3_FA_m
+```{r}
+vp_rslf3_FA <- ggplot(data, aes(x=group_dich, y=R_SLF3_bin_FA_m, colour=group_dich)) + 
+  geom_violin(alpha = 0.5) +
+  geom_quasirandom() + 
+  theme(legend.position = "none") +
+  scale_y_continuous(name = "Right SLFIII FA") + 
+  scale_x_discrete(name = "")
+vp_rslf3_FA <- vp_rslf3_FA + geom_boxplot(width=0.06) + 
+  stat_summary(fun.y=mean, geom="point", shape=2, size=2, colour="blue") +
+  stat_summary(fun.y=median, geom="point", size=2, color="purple") + 
+  scale_color_brewer(palette="Dark2") +
+  labs(title= "Right SLFIII FA")
+legend_title <- "Group"
+vp_rslf3_FA <- vp_rslf3_FA + theme(legend.position = "none")
+vp_rslf3_FA
+ggsave("vp_rslf3_FA.png")
+```
+
+#L_SLF1_bin_vol
+```{r}
+vp_lslf1_bin_vol <- ggplot(data, aes(x=group_dich, y=L_SLF1_bin_vol, colour=group_dich)) + 
+  geom_violin(alpha = 0.5) +
+  geom_quasirandom() + 
+  theme(legend.position = "none") +
+  scale_y_continuous(name = "Left SLFI Volume") + 
+  scale_x_discrete(name = "")
+vp_lslf1_bin_vol <- vp_lslf1_bin_vol + geom_boxplot(width=0.06) + 
+  stat_summary(fun.y=mean, geom="point", shape=2, size=2, colour="blue") +
+  stat_summary(fun.y=median, geom="point", size=2, color="purple") + 
+  scale_color_brewer(palette="Dark2") +
+  labs(title= "Left SLFI Volume")
+legend_title <- "Group"
+vp_lslf1_bin_vol <- vp_lslf1_bin_vol + theme(legend.position = "none")
+vp_lslf1_bin_vol
+ggsave("vp_lslf1_vol.png")
+```
+#L_SLF2_bin_vol
+```{r}
+vp_lslf2_bin_vol <- ggplot(data, aes(x=group_dich, y=L_SLF2_bin_vol, colour=group_dich)) + 
+  geom_violin(alpha = 0.5) +
+  geom_quasirandom() + 
+  theme(legend.position = "none") +
+  scale_y_continuous(name = "Left SLFII Volume") + 
+  scale_x_discrete(name = "")
+vp_lslf2_bin_vol <- vp_lslf2_bin_vol + geom_boxplot(width=0.06) + 
+  stat_summary(fun.y=mean, geom="point", shape=2, size=2, colour="blue") +
+  stat_summary(fun.y=median, geom="point", size=2, color="purple") + 
+  scale_color_brewer(palette="Dark2") +
+  labs(title= "Left SLFII Volume")
+legend_title <- "Group"
+vp_lslf2_bin_vol <- vp_lslf2_bin_vol + theme(legend.position = "none")
+vp_lslf2_bin_vol
+ggsave("vp_lslf2_vol.png")
+```
+#L_SLF3_bin_vol
+```{r}
+vp_lslf3_bin_vol <- ggplot(data, aes(x=group_dich, y=L_SLF3_bin_vol, colour=group_dich)) + 
+  geom_violin(alpha = 0.5) +
+  geom_quasirandom() + 
+  theme(legend.position = "none") +
+  scale_y_continuous(name = "Left SLFIII Volume") + 
+  scale_x_discrete(name = "")
+vp_lslf3_bin_vol <- vp_lslf3_bin_vol + geom_boxplot(width=0.06) + 
+  stat_summary(fun.y=mean, geom="point", shape=2, size=2, colour="blue") +
+  stat_summary(fun.y=median, geom="point", size=2, color="purple") + 
+  scale_color_brewer(palette="Dark2") +
+  labs(title= "Left SLFIII Volume")
+legend_title <- "Group"
+vp_lslf3_bin_vol <- vp_lslf3_bin_vol + theme(legend.position = "none")
+vp_lslf3_bin_vol
+ggsave("vp_lslf3_vol.png")
+```
+#R_SLF1_bin_vol
+```{r}
+vp_rslf1_bin_vol <- ggplot(data, aes(x=group_dich, y=R_SLF1_bin_vol, colour=group_dich)) + 
+  geom_violin(alpha = 0.5) +
+  geom_quasirandom() + 
+  theme(legend.position = "none") +
+  scale_y_continuous(name = "Right SLFI Volume") + 
+  scale_x_discrete(name = "")
+vp_rslf1_bin_vol <- vp_rslf1_bin_vol + geom_boxplot(width=0.06) + 
+  stat_summary(fun.y=mean, geom="point", shape=2, size=2, colour="blue") +
+  stat_summary(fun.y=median, geom="point", size=2, color="purple") + 
+  scale_color_brewer(palette="Dark2") +
+  labs(title= "Right SLFI Volume")
+legend_title <- "Group"
+vp_rslf1_bin_vol <- vp_rslf1_bin_vol + theme(legend.position = "none")
+vp_rslf1_bin_vol
+ggsave("vp_rslf1_vol.png")
+```
+
+#R_SLF2_bin_vol
+```{r}
+vp_rslf2_bin_vol <- ggplot(data, aes(x=group_dich, y=R_SLF2_bin_vol, colour=group_dich)) + 
+  geom_violin(alpha = 0.5) +
+  geom_quasirandom() + 
+  theme(legend.position = "none") +
+  scale_y_continuous(name = "Right SLFII Volume") + 
+  scale_x_discrete(name = "")
+vp_rslf2_bin_vol <- vp_rslf2_bin_vol + geom_boxplot(width=0.06) + 
+  stat_summary(fun.y=mean, geom="point", shape=2, size=2, colour="blue") +
+  stat_summary(fun.y=median, geom="point", size=2, color="purple") + 
+  scale_color_brewer(palette="Dark2") +
+  labs(title= "Right SLFII Volume")
+legend_title <- "Group"
+vp_rslf2_bin_vol <- vp_rslf2_bin_vol + theme(legend.position = "none")
+vp_rslf2_bin_vol
+ggsave("vp_rslf2_vol.png")
+```
+
+#R_SLF3_bin_vol
+```{r}
+vp_rslf3_bin_vol <- ggplot(data, aes(x=group_dich, y=R_SLF3_bin_vol, colour=group_dich)) + 
+  geom_violin(alpha = 0.5) +
+  geom_quasirandom() + 
+  theme(legend.position = "none") +
+  scale_y_continuous(name = "Right SLFIII Volume") + 
+  scale_x_discrete(name = "")
+vp_rslf3_bin_vol <- vp_rslf3_bin_vol + geom_boxplot(width=0.06) + 
+  stat_summary(fun.y=mean, geom="point", shape=2, size=2, colour="blue") +
+  stat_summary(fun.y=median, geom="point", size=2, color="purple") + 
+  scale_color_brewer(palette="Dark2") +
+  labs(title= "Right SLFIII Volume")
+legend_title <- "Group"
+vp_rslf3_bin_vol <- vp_rslf3_bin_vol + theme(legend.position = "none")
+vp_rslf3_bin_vol
+ggsave("vp_rslf3_vol.png")
+```
+#Play plotting
+```{r}
+#vp_tm + stat_summary(fun.data="mean_sdl", mult=1, 
+#                 geom="crossbar", width=0.2 )
+ 
+#vp_tm + stat_summary(fun.data=mean_sdl, mult=1, 
+#                 geom="pointrange", color="purple")
+
+#vp_tm + geom_dotplot(binaxis='y', stackdir='center', dotsize=1)
+```
+
+
+```{r}
+#plot_tm <- ggplot(data, aes(x = group_dich, y = c3_nback_b_total_misses_2)) +
+#  geom_violin(alpha = 0.5) +
+# geom_quasirandom() +
+#  theme(legend.position = "none") + 
+#  scale_y_continuous(name = "Misses") + 
+#  scale_x_continuous(name = "ID") +
+#  theme_pubr() +
+#  theme(legend.position = c(0.9, .9))
+```
+
