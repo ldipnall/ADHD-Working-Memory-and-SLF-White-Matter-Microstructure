@@ -1,3 +1,7 @@
+This repository includes the files used in the scientific paper "Fronto-parietal White Matter Microstructure Associated with Working Memory Performance in Children with ADHD" published in Cortex in 2023.
+
+The STATA .do file includes notes that outline how the analysis was run at each step. For any questions please get in touch.
+
 N-BACK FILES FOR USE IN EPRIME SOFTWARE
 Nback2_CAP.ebs2Nback2_CAP.es2
 square4.bmp10unfilledsquares.bmpboing_3.wavDing.wavDingLing.wavnull.wavRestPeriod.bmpsquare1.bmpsquare2.bmpsquare3.bmpsquare5.bmpsquare6.bmpsquare7.bmpsquare8.bmpsquare9.bmpsquare10.bmp
